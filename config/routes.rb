@@ -11,7 +11,7 @@ Rails.application.routes.draw do
 
           match "/#{model}/#{action}",
                 to: "#{model}##{action}",
-                via: [:get, :post, :patch, :delete]
+                via: [:get, :post, :patch, :put, :delete]
         end
       end
     end

@@ -17,28 +17,53 @@ module DynamicAPI
             else
               params.keys
             end
-          result =
-            case action
-            when "create"
-              service.new.call(params.permit(*permitted_keys))
 
-            when "list"
-              service.new.call
+            begin
+              result =
+                case action
+                when "create"
+                  service.new(params.permit(*permitted_keys.push(:password, :password_confirmation, :limit, :page))).call
 
-            when "show"
-              service.new.call(params[:id])
+                when "list"
+                  service.new(params).call
 
-            when "update"
-              service.new.call(params[:id], params.permit(*permitted_keys))
+                when "show"
+                  service.new(params[:id]).call
 
-            when "delete"
-              service.new.call(params[:id])
+                when "update"
+                  service.new(params[:id], params.permit(*permitted_keys)).call
 
-            else
-              service.new.call(params.permit(*permitted_keys))
+                when "delete"
+                  service.new(params[:id]).call
+
+                else
+                  service.new(params.permit(*permitted_keys)).call
+                end
+
+              status_code =
+                case action
+                when "create"
+                  :created
+                when "delete"
+                  :no_content
+                else
+                  :ok
+                end
+
+              render json: result, status: status_code
+
+            rescue ActiveRecord::RecordNotFound => e
+              render json: { error: e.message }, status: :not_found
+
+            rescue ActiveRecord::RecordInvalid => e
+              render json: { error: e.record.errors.full_messages }, status: :unprocessable_entity
+
+            rescue ActionController::ParameterMissing => e
+              render json: { error: e.message }, status: :bad_request
+
+            rescue StandardError => e
+              render json: { error: e.message }, status: :internal_server_error
             end
-
-          render json: result
         end
       end
       module_api = Object.const_defined?(:Api) ? Api : Object.const_set(:Api, Module.new)
