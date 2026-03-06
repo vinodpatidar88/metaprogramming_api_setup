@@ -1,10 +1,19 @@
 Rails.application.routes.draw do
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+  namespace :api do
+    namespace :v1 do
+      Dir[Rails.root.join("app/services/*")].each do |model_folder|
 
-  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
-  # Can be used by load balancers and uptime monitors to verify that the app is live.
-  get "up" => "rails/health#show", as: :rails_health_check
+        model = File.basename(model_folder)
 
-  # Defines the root path route ("/")
-  # root "posts#index"
+        Dir[File.join(model_folder, "*.rb")].each do |file|
+
+          action = File.basename(file, ".rb").split("_").first
+
+          match "/#{model}/#{action}",
+                to: "#{model}##{action}",
+                via: [:get, :post, :patch, :delete]
+        end
+      end
+    end
+  end
 end
