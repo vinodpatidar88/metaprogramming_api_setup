@@ -12,7 +12,6 @@ module Posts
     end
 
     def create_post
-      binding.pry
       Post.create!(@params)
     end
   end

@@ -10,17 +10,17 @@ module Posts
       posts = get_user_posts
       return {
         data: posts,
-        meta: {
-          current_page: posts.current_page,
-          total_page: posts.total_pages,
-          total_count: posts.total_count
-        }
+        # meta: {
+        #   current_page: posts.current_page,
+        #   total_page: posts.total_pages,
+        #   total_count: posts.total_count
+        # }
       }
     end
 
     def get_user_posts
-      binding.pry
-      Post.where(status: :active).includes(:user).page(@page).per(@limit)
+      posts  = Post.includes(:user).where(status: :active)
+      posts.map { |t| { title: t.title, subtitle: t.subtitle, created_at: t.created_at, updated_at: t.updated_at, images: t.images.map { |img| rails_blob_url(img) }, videos: t.videos.map { |vid| rails_blob_url(vid) } }}
     end
   end
 end

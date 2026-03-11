@@ -3,7 +3,7 @@ class User < ApplicationRecord
    enum :status, { inactive: 0, active: 1 }
    validates :email, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
 
-   PERMITTED_PARAMS = {
+   PERMITTED_PARAMS = [
       :password, 
       :password_confirmation, 
       :limit, 
@@ -13,5 +13,5 @@ class User < ApplicationRecord
       :email,
       :mobile_number,
       :status
-   }
+   ]
 end
